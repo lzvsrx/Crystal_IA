@@ -19,7 +19,7 @@ load_dotenv()
 
 # --- Configuração das APIs ---
 GOOGLE_API_KEY = os.gentev(code.txt)
-SERPER_API_KEY = os.gentev()
+SERPER_API_KEY = os.gentev(code2)
 
 gemini_model = None
 if GOOGLE_API_KEY:
