@@ -34,6 +34,7 @@ except OSError:
         logging.info("Modelo SpaCy (pt_core_news_sm) baixado e carregado com sucesso.")
     except Exception as e:
         logging.error(f"Erro ao baixar ou carregar o modelo SpaCy: {e}. O PLN pode ser limitado.")
+        # Fallback se o download falhar, pode ser necessário carregar um modelo mais básico ou lidar com isso
         def nlp_fallback(text):
             return text.lower()
         nlp = nlp_fallback
@@ -44,7 +45,7 @@ knowledge_vectors = None
 knowledge_data = None # Para armazenar os dados do DB (DataFrame)
 
 # Limiar de similaridade para o banco de dados interno
-DB_SIMILARITY_THRESHOLD = 0.70
+DB_SIMILARITY_THRESHOLD = 0.70 # Aumentado ligeiramente para priorizar respostas mais exatas do DB
 
 # --- Funções de Processamento de Texto ---
 def preprocess_text(text):
@@ -55,11 +56,11 @@ def preprocess_text(text):
         return ""
     text = text.lower()
     text = re.sub(r'[^\w\s]', '', text)
-    if hasattr(nlp, 'pipe'):
+    if hasattr(nlp, 'pipe'): # Verifica se o nlp é um objeto SpaCy válido
         doc = nlp(text)
         tokens = [token.lemma_ for token in doc if not token.is_stop and not token.is_space and token.text.strip()]
         return " ".join(tokens)
-    else:
+    else: # Fallback para o caso de o SpaCy não ter carregado
         return text
 
 def train_nlp_model(df_knowledge):
@@ -136,22 +137,22 @@ def search_serper(query):
     
     try:
         logging.info(f"Fazendo requisição SerperDev para: '{query}'")
-        response = requests.post(url, headers=headers, data=payload, timeout=15)
-        response.raise_for_status()
+        response = requests.post(url, headers=headers, data=payload, timeout=15) # Aumenta timeout
+        response.raise_for_status() # Levanta um erro para códigos de status HTTP ruins (4xx ou 5xx)
         results = response.json()
         
         snippets = []
         if 'organic' in results:
             for item in results['organic']:
-                if 'snippet' in item and item['snippet'].strip():
+                if 'snippet' in item and item['snippet'].strip(): # Garante que o snippet não é vazio
                     snippets.append(item['snippet'])
         
         if not snippets:
             logging.info(f"SerperDev retornou resultados vazios para: '{query}'")
-            return ""
+            return "" # Retorna string vazia se não houver snippets úteis
 
         logging.info(f"SerperDev retornou {len(snippets)} snippets para '{query}'.")
-        return "\n".join(snippets[:3])
+        return "\n".join(snippets[:3]) # Retorna os 3 primeiros snippets como uma string
         
     except requests.exceptions.Timeout:
         logging.error(f"Erro de Timeout ao conectar ao SerperDev para '{query}'.")
@@ -196,10 +197,10 @@ def get_crystal_response(user_query, chat_history):
         return search_results_text, "serper_search_error"
     elif not search_results_text.strip():
         logging.warning(f"Busca SerperDev retornou resultados vazios ou sem conteúdo útil para: '{user_query}'.")
-        # Fallback message when search yields no useful results
+        # Mensagem de fallback quando a busca não retorna resultados úteis
         return "Ah, os cristais da web estão um pouco embaçados agora! Não encontrei informações claras sobre isso. Tente me perguntar de outra forma ou sobre outro tópico!", "serper_no_results"
     else:
-        # Construct a response based on search results
+        # Constrói uma resposta com base nos snippets da busca
         response = (
             f"Encontrei algumas informações interessantes na vastidão da web sobre '{user_query}':\n\n"
             f"{search_results_text}\n\n"
