@@ -63,18 +63,17 @@ st.markdown("---")
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "api_calls_count" not in st.session_state:
-    st.session_state.api_calls_count = {'gemini': 0, 'serper': 0}
+    st.session_state.api_calls_count = {'serper': 0} # Apenas Serper agora
 
 # --- Botão Limpar Chat (Experiência do Usuário) ---
-# Colocado na sidebar ou em uma coluna para não atrapalhar o chat principal
 col1, col2 = st.columns([1, 4])
 with col1:
     if st.button("Limpar Chat 🧹", key="clear_chat_button"):
         st.session_state.messages = []
-        st.session_state.api_calls_count = {'gemini': 0, 'serper': 0} # Zera contadores também
+        st.session_state.api_calls_count = {'serper': 0} # Zera contadores também
         st.experimental_rerun() # Reinicia o app para limpar a tela
 with col2:
-    st.markdown(f"**API Calls:** Gemini: `{st.session_state.api_calls_count['gemini']}` | Serper: `{st.session_state.api_calls_count['serper']}`")
+    st.markdown(f"**API Calls:** Serper: `{st.session_state.api_calls_count['serper']}`")
 
 
 # --- Exibir Histórico do Chat ---
@@ -101,21 +100,17 @@ if user_input:
             response, response_type = nlp.get_crystal_response(user_input, st.session_state.messages)
             
             # Atualiza contadores de API e exibe mensagem de origem
-            if "llm" in response_type: # Se a resposta envolveu o LLM
-                st.session_state.api_calls_count['gemini'] += 1
-            if "search" in response_type: # Se a resposta envolveu busca (mesmo que com erro)
+            if "serper" in response_type: # Se a resposta envolveu busca (mesmo que com erro)
                 st.session_state.api_calls_count['serper'] += 1
 
             if response_type == "db_internal":
                 st.info("💡 Resposta precisa do banco de dados interno da Crystal!")
-            elif response_type == "llm_search":
-                st.info("🌐 Crystal pesquisou na web para você e sintetizou!")
-            elif response_type == "llm_direct":
-                st.info("🧠 Resposta gerada pela inteligência cósmica da Crystal!")
-            elif response_type == "llm_fallback_search":
+            elif response_type == "serper_search_success":
+                st.info("🌐 Crystal pesquisou na web para você!")
+            elif response_type == "serper_search_error":
+                st.error("❌ Ops! A Crystal encontrou um problema ao tentar buscar na web. Tente novamente mais tarde.")
+            elif response_type == "serper_no_results":
                 st.warning("⚠️ Crystal tentou pesquisar, mas os resultados foram nebulosos. Ela te deu uma resposta alternativa!")
-            elif response_type == "llm_search_error":
-                 st.error("❌ Ops! A Crystal encontrou um problema ao tentar buscar na web. Tente novamente mais tarde.")
 
             st.markdown(response)
             # Adicionar resposta da Crystal ao histórico
