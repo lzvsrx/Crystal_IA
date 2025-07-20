@@ -19,7 +19,7 @@ load_dotenv()
 
 # --- Configuração das APIs ---
 GOOGLE_API_KEY = "AIzaSyAkx9QB3pjMluI8Y3kD0WyjYZLqjhTyPiA"
-SERPER_API_KEY = os.getenv("SERPER_API_KEY")
+SERPER_API_KEY = 537a7131cbc71055de729fe0975ed273ac416494
 
 gemini_model = None
 if GOOGLE_API_KEY:
