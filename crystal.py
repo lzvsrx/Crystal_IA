@@ -74,7 +74,7 @@ with col1:
         st.session_state.api_calls_count = {'gemini': 0, 'serper': 0} # Zera contadores também
         st.experimental_rerun() # Reinicia o app para limpar a tela
 with col2:
-    st.markdown(f"**API Calls: AIzaSyAkx9QB3pjMluI8Y3kD0WyjYZLqjhTyPiA** Gemini: `{st.session_state.api_calls_count['gemini']}` | Serper: `{st.session_state.api_calls_count['serper']}`")
+    st.markdown(f"**API Calls:** Gemini: `{st.session_state.api_calls_count['gemini']}` | Serper: `{st.session_state.api_calls_count['serper']}`")
 
 
 # --- Exibir Histórico do Chat ---
