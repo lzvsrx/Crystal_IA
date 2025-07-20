@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 load_dotenv()
 
 # --- Configuração das APIs ---
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+GOOGLE_API_KEY = "AIzaSyAkx9QB3pjMluI8Y3kD0WyjYZLqjhTyPiA"
 SERPER_API_KEY = os.getenv("SERPER_API_KEY")
 
 gemini_model = None
